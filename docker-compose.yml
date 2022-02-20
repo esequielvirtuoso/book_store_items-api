@@ -1,0 +1,48 @@
+version: "3.7"
+
+networks:
+  my-network-name:
+    name: ${NETWORK_NAME}
+    driver: bridge
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    container_name: ${ES01_NAME}
+    restart: always
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch-data-volume:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      # - 9300:9300
+    networks:
+      - my-network-name
+
+  kibana:
+    container_name: ${KIBANA_NAME}
+    image: docker.elastic.co/kibana/kibana:7.10.2
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    networks:
+      - my-network-name
+
+volumes:
+  elasticsearch-data-volume:
+    driver: local
