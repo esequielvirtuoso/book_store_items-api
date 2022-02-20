@@ -6,7 +6,7 @@ This application follows the Model, View, and Controller (MVC) pattern.
 
 It also uses the [gorilla mux](https://github.com/gorilla/mux) HTTP framework to handle the requests.
 
-User is the core domain of this application.
+Item is the core domain of this application.
 
 ![alt text](./doc/images/microservicesDiagram.jpg?raw=true)
 
