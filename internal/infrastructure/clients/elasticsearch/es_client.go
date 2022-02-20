@@ -23,11 +23,12 @@ type esClient struct {
 }
 
 func Init(esURL string) {
+	log := logger.GetLogger()
 	client, err := elastic.NewClient(
 		elastic.SetURL(esURL),
 		elastic.SetHealthcheckInterval(10*time.Second),
-		// elastic.SetErrorLog()
-		// elastic.SetInfoLog()
+		elastic.SetErrorLog(log),
+		elastic.SetInfoLog(log),
 	)
 
 	if err != nil {
@@ -38,6 +39,7 @@ func Init(esURL string) {
 
 	// Create the index if it does not exists
 	// I.e:
+	// PUT
 	// {
 	// 	"settings": {
 	// 		"index": {
