@@ -24,7 +24,7 @@ User is the core domain of this application.
 ### Environment variables
 
 ```bash
-# ES_URL="http://127.0.0.1:9200"
+    export ES_URL="http://127.0.0.1:9200"
 ```
 
 ### Installing and running locally

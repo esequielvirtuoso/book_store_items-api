@@ -1,7 +1,7 @@
 # include help.mk
 
 # tell Make the following targets are not files, but targets within Makefile
-.PHONY: version clean audit lint install build image tag push release run run-local remove-docker env env-stop print-var check-env check-used-ports
+.PHONY: version clean audit lint install build image tag push release run run-local remove-docker env env-stop check-env check-used-ports
 .DEFAULT_GOAL := help
 
 GITHUB_GROUP = esequielvirtuoso
@@ -14,9 +14,6 @@ DATE          	= $(shell date -uIseconds)
 VERSION  	  	= $(shell git describe --always --tags)
 NAME           	= $(shell basename $(CURDIR))
 IMAGE          	= $(HUB_USER)/$(HUB_REPO):$(BUILD)
-
-MYSQL_NAME = mysql_$(NAME)_$(BUILD)
-MYSQL_ADMINER_NAME = mysql_adminer_$(NAME)_$(BUILD)
 
 # NETWORK_NAME can be dinamically generated with the following env set
 # NETWORK_NAME  = network_$(NAME)_$(BUILD)
@@ -51,6 +48,8 @@ LICENSE=basic
 # Port to expose Elasticsearch HTTP API to the host
 ES_PORT=127.0.0.1:9200
 #ES_PORT=127.0.0.1:9200
+ES_URL_CONTAINER=http://elasticsearch:9200
+ES_URL_LOCAL=http://127.0.0.1:9200
 
 # Port to expose Kibana to the host
 KIBANA_PORT=5601
@@ -67,9 +66,6 @@ MEM_LIMIT=1073741824
 check-used-ports:
 	sudo netstat -tulpn | grep LISTEN
 
-print_var:
-	echo $(DATE)
-
 git-config:
 	git config --replace-all core.hooksPath .githooks
 
@@ -77,6 +73,8 @@ check-env-%:
 	@ if [ "${${*}}" = ""  ]; then \
 		echo "Variable '$*' not set"; \
 		exit 1; \
+	else \
+		echo "${${*}}"; \
 	fi
 
 version: ##@other Check version.
@@ -135,7 +133,7 @@ test: ##@check Run tests and coverage.
 	docker build --progress=plain \
 		--network $(NETWORK_NAME) \
 		--tag $(IMAGE) \
-		--build-arg MYSQL_URL="$(MYSQL_URL)" \
+		--build-arg ES_URL="$(ES_URL_LOCAL)" \
 		--target=test \
 		--file=Dockerfile .
 
@@ -179,16 +177,16 @@ run:
 	go run main.go
 
 run-local: ##@dev Run locally.
-	MYSQL_URL="$(MYSQL_NAME)" \
+	ES_URL="$(ES_URL_LOCAL)" \
 	run
 
-run-docker: check-env-MYSQL_URL ##@docker Run docker container.
+run-docker: ##@docker Run docker container.
 	docker run --rm \
 		--name $(NAME) \
 		--network $(NETWORK_NAME) \
 		-e LOGGER_LEVEL=debug \
-		-e MYSQL_URL="root:passwd@tcp(mysql_db:3306)/users_db?charset=utf8" \
-		-p 5001:8081 \
+		-e ES_URL="$(ES_URL_CONTAINER)" \
+		-p 5003:8083 \
 		$(IMAGE)
 
 remove-docker: ##@docker Remove docker container.
