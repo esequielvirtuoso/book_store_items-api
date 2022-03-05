@@ -23,6 +23,7 @@ func StartApplication() {
 
 	env.CheckRequired(envElasticURL)
 
+	fmt.Println(getElasticSerachURL())
 	elasticsearch.Init(getElasticSerachURL())
 
 	mapUrls()
